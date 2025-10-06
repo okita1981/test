@@ -3,22 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChatGPT風 UI（Aisle Chat）</title>
+    <title>Aisle Chat（GPT連携デモ）</title>
     <style>
+      /* ===== Aisleテーマカラー ===== */
+      :root {
+        --primary-color: #00AEEF; /* Aisleブルー */
+        --primary-hover: #0099D6;
+        --light-bg: #f9fafb;
+        --border-color: #e5e7eb;
+        --text-color: #1f2937;
+        --text-light: #6b7280;
+        --user-msg-bg: #E6F7FF;
+        --assistant-msg-bg: #f3f4f6;
+      }
+
       body {
         margin: 0;
-        background-color: #f7f7f8;
+        background-color: var(--light-bg);
         font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        color: #222;
+        color: var(--text-color);
       }
+
       header {
-        background-color: #10a37f;
-        color: #fff;
+        background-color: #fff;
         text-align: center;
-        padding: 1.2rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
+        padding: 2rem 1rem;
+        border-bottom: 1px solid var(--border-color);
       }
+
+      header img {
+        width: 180px;
+        height: auto;
+      }
+
+      header h1 {
+        color: var(--text-color);
+        font-size: 1.8rem;
+        margin: 0.6rem 0 0.2rem;
+      }
+
+      header p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      /* === チャットUI部分 === */
       #chat {
         max-width: 700px;
         margin: 40px auto;
@@ -29,31 +59,38 @@
         overflow-y: auto;
         height: 70vh;
       }
+
       .message {
         display: flex;
         margin-bottom: 1rem;
       }
+
       .user {
         justify-content: flex-end;
       }
+
       .bot {
         justify-content: flex-start;
       }
+
       .bubble {
         padding: 10px 15px;
         border-radius: 12px;
         max-width: 75%;
         line-height: 1.5;
       }
+
       .user .bubble {
-        background-color: #10a37f;
+        background-color: var(--primary-color);
         color: white;
         border-bottom-right-radius: 0;
       }
+
       .bot .bubble {
-        background-color: #ececec;
+        background-color: var(--assistant-msg-bg);
         border-bottom-left-radius: 0;
       }
+
       #input-area {
         display: flex;
         justify-content: center;
@@ -64,6 +101,7 @@
         bottom: 0;
         border-top: 1px solid #ddd;
       }
+
       input {
         flex: 1;
         padding: 12px;
@@ -71,9 +109,10 @@
         border-radius: 8px;
         font-size: 15px;
       }
+
       button {
         margin-left: 10px;
-        background-color: #10a37f;
+        background-color: var(--primary-color);
         color: white;
         border: none;
         border-radius: 8px;
@@ -81,19 +120,31 @@
         cursor: pointer;
         font-weight: 600;
       }
+
       button:hover {
-        background-color: #0e8d6d;
+        background-color: var(--primary-hover);
       }
     </style>
   </head>
+
   <body>
-    <header>Aisle Chat（GPT連携デモ）</header>
+    <!-- ✅ ロゴとタイトル -->
+    <header>
+      <img src="logo_tag_nashi.png" alt="Aisle ロゴ" />
+      <h1>Aisle Chat</h1>
+      <p>AIに選ばれる言葉を、設計する</p>
+    </header>
+
+    <!-- ✅ チャットUI -->
     <main id="chat"></main>
+
+    <!-- ✅ 入力欄 -->
     <div id="input-area">
       <input id="user-input" placeholder="メッセージを入力..." />
       <button id="send">送信</button>
     </div>
 
+    <!-- ✅ JSロジック -->
     <script>
       const chat = document.getElementById("chat");
       const input = document.getElementById("user-input");

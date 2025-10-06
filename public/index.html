@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Aisle Chat（GPT連携デモ）</title>
     <style>
-      /* ===== Aisleテーマカラー ===== */
       :root {
-        --primary-color: #00AEEF; /* Aisleブルー */
-        --primary-hover: #0099D6;
+        --primary-color: #00AEEF;
         --light-bg: #f9fafb;
         --border-color: #e5e7eb;
         --text-color: #1f2937;
         --text-light: #6b7280;
-        --user-msg-bg: #E6F7FF;
         --assistant-msg-bg: #f3f4f6;
+        --user-msg-bg: #E6F7FF;
       }
 
       body {
@@ -22,42 +20,58 @@
         background-color: var(--light-bg);
         font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         color: var(--text-color);
+        text-align: center;
       }
 
+      /* === プロフィール風ヘッダー === */
       header {
-        background-color: #fff;
-        text-align: center;
-        padding: 2rem 1rem;
-        border-bottom: 1px solid var(--border-color);
+        margin-top: 60px;
+        margin-bottom: 30px;
       }
 
       header img {
-        width: 180px;
-        height: auto;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
       }
 
       header h1 {
-        color: var(--text-color);
         font-size: 1.8rem;
-        margin: 0.6rem 0 0.2rem;
+        margin: 0.8rem 0 0.3rem;
       }
 
       header p {
         color: var(--text-light);
-        font-size: 0.9rem;
-        margin: 0;
+        font-size: 0.95rem;
+        margin: 0.2rem 0;
       }
 
-      /* === チャットUI部分 === */
+      /* === 会話きっかけテキスト === */
+      .prompt-intro {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin: 1rem auto 2rem;
+        max-width: 420px;
+        color: var(--text-light);
+        font-size: 0.95rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* === チャットエリア === */
       #chat {
         max-width: 700px;
-        margin: 40px auto;
+        margin: 0 auto 40px;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         padding: 20px;
         overflow-y: auto;
-        height: 70vh;
+        height: 55vh;
+        text-align: left;
       }
 
       .message {
@@ -91,6 +105,7 @@
         border-bottom-left-radius: 0;
       }
 
+      /* === 入力欄 === */
       #input-area {
         display: flex;
         justify-content: center;
@@ -122,18 +137,24 @@
       }
 
       button:hover {
-        background-color: var(--primary-hover);
+        background-color: #0099D6;
       }
     </style>
   </head>
 
   <body>
-    <!-- ✅ ロゴとタイトル -->
+    <!-- ✅ プロフィールヘッダー -->
     <header>
       <img src="logo_tag_nashi.png" alt="Aisle ロゴ" />
       <h1>Aisle Chat</h1>
-      <p>AIに選ばれる言葉を、設計する</p>
+      <p>AI出現設計エンジン｜Aisle</p>
     </header>
+
+    <!-- ✅ 会話のきっかけ -->
+    <div class="prompt-intro">
+      こんにちは。AisleのGPT連携デモです。<br>
+      出現構造やマーケティング支援について話してみませんか？
+    </div>
 
     <!-- ✅ チャットUI -->
     <main id="chat"></main>
@@ -163,7 +184,6 @@
         if (!text) return;
         addMessage("user", text);
         input.value = "";
-
         addMessage("bot", "…考えています…");
 
         try {

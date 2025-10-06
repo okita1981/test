@@ -1,177 +1,144 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LLM Chat App</title>
+    <title>ChatGPT風 UI（Aisle Chat）</title>
     <style>
-      :root {
-        --primary-color: #f6821f;
-        --primary-hover: #e67e22;
-        --light-bg: #f9fafb;
-        --border-color: #e5e7eb;
-        --text-color: #1f2937;
-        --text-light: #6b7280;
-        --user-msg-bg: #fff2e6;
-        --assistant-msg-bg: #f3f4f6;
-      }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-          Cantarell, sans-serif;
-        line-height: 1.6;
-        color: var(--text-color);
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 1rem;
+        margin: 0;
+        background-color: #f7f7f8;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #222;
       }
-
       header {
+        background-color: #10a37f;
+        color: #fff;
         text-align: center;
-        margin-bottom: 2rem;
-        padding: 1rem 0;
-        border-bottom: 1px solid var(--border-color);
+        padding: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
       }
-
-      h1 {
-        font-size: 1.5rem;
-        color: var(--primary-color);
-      }
-
-      .chat-container {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 200px);
-        min-height: 400px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      .chat-messages {
-        flex: 1;
+      #chat {
+        max-width: 700px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
         overflow-y: auto;
-        padding: 1rem;
-        background-color: var(--light-bg);
+        height: 70vh;
       }
-
       .message {
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        border-radius: 8px;
-        max-width: 80%;
-      }
-
-      .user-message {
-        background-color: var(--user-msg-bg);
-        align-self: flex-end;
-        margin-left: auto;
-      }
-
-      .assistant-message {
-        background-color: var(--assistant-msg-bg);
-        align-self: flex-start;
-      }
-
-      .message-input {
         display: flex;
-        padding: 0.75rem;
-        border-top: 1px solid var(--border-color);
-        background-color: white;
+        margin-bottom: 1rem;
       }
-
-      #user-input {
+      .user {
+        justify-content: flex-end;
+      }
+      .bot {
+        justify-content: flex-start;
+      }
+      .bubble {
+        padding: 10px 15px;
+        border-radius: 12px;
+        max-width: 75%;
+        line-height: 1.5;
+      }
+      .user .bubble {
+        background-color: #10a37f;
+        color: white;
+        border-bottom-right-radius: 0;
+      }
+      .bot .bubble {
+        background-color: #ececec;
+        border-bottom-left-radius: 0;
+      }
+      #input-area {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: #fff;
+        position: sticky;
+        bottom: 0;
+        border-top: 1px solid #ddd;
+      }
+      input {
         flex: 1;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        font-family: inherit;
-        resize: none;
-        min-height: 44px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
       }
-
-      #send-button {
-        margin-left: 0.5rem;
-        padding: 0 1rem;
-        background-color: var(--primary-color);
+      button {
+        margin-left: 10px;
+        background-color: #10a37f;
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
+        padding: 12px 18px;
         cursor: pointer;
-        transition: background-color 0.2s;
+        font-weight: 600;
       }
-
-      #send-button:hover {
-        background-color: var(--primary-hover);
-      }
-
-      #send-button:disabled {
-        background-color: var(--text-light);
-        cursor: not-allowed;
-      }
-
-      .typing-indicator {
-        display: none;
-        margin-bottom: 1rem;
-        font-style: italic;
-        color: var(--text-light);
-      }
-
-      .typing-indicator.visible {
-        display: block;
-      }
-
-      footer {
-        margin-top: 1rem;
-        text-align: center;
-        font-size: 0.85rem;
-        color: var(--text-light);
+      button:hover {
+        background-color: #0e8d6d;
       }
     </style>
   </head>
   <body>
-    <header>
-      <h1>Cloudflare AI Chat</h1>
-      <p>Powered by Cloudflare Workers AI</p>
-    </header>
-
-    <div class="chat-container">
-      <div id="chat-messages" class="chat-messages">
-        <div class="message assistant-message">
-          <p>
-            Hello! I'm an LLM chat app powered by Cloudflare Workers AI. How can
-            I help you today?
-          </p>
-        </div>
-      </div>
-
-      <div class="typing-indicator" id="typing-indicator">
-        AI is thinking...
-      </div>
-
-      <div class="message-input">
-        <textarea
-          id="user-input"
-          placeholder="Type your message here..."
-          rows="1"
-          autofocus
-        ></textarea>
-        <button id="send-button">Send</button>
-      </div>
+    <header>Aisle Chat（GPT連携デモ）</header>
+    <main id="chat"></main>
+    <div id="input-area">
+      <input id="user-input" placeholder="メッセージを入力..." />
+      <button id="send">送信</button>
     </div>
 
-    <footer>
-      <p>Cloudflare Workers AI Chat Template &copy; 2025</p>
-    </footer>
+    <script>
+      const chat = document.getElementById("chat");
+      const input = document.getElementById("user-input");
+      const sendBtn = document.getElementById("send");
 
-    <!-- Chat app script -->
-    <script src="chat.js"></script>
+      function addMessage(role, text) {
+        const msg = document.createElement("div");
+        msg.classList.add("message", role);
+        msg.innerHTML = `<div class="bubble">${text}</div>`;
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
+        addMessage("user", text);
+        input.value = "";
+
+        addMessage("bot", "…考えています…");
+
+        try {
+          const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              messages: [
+                { role: "system", content: "あなたは親切なアシスタントです。" },
+                { role: "user", content: text },
+              ],
+            }),
+          });
+          const data = await response.json();
+          document.querySelector(".bot:last-child .bubble").innerText =
+            data.reply || "（応答なし）";
+        } catch (error) {
+          document.querySelector(".bot:last-child .bubble").innerText =
+            "エラーが発生しました。";
+        }
+      }
+
+      sendBtn.addEventListener("click", sendMessage);
+      input.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+      });
+    </script>
   </body>
 </html>

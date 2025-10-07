@@ -1,215 +1,145 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aisle Chat（GPT連携デモ）</title>
-    <style>
-      :root {
-        --primary-color: #00AEEF;
-        --light-bg: #f9fafb;
-        --border-color: #e5e7eb;
-        --text-color: #1f2937;
-        --text-light: #6b7280;
-        --assistant-msg-bg: #f3f4f6;
-        --user-msg-bg: #E6F7FF;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortune Travel | Aisle</title>
+  <style>
+    body {
+      font-family: "Hiragino Sans", "Noto Sans JP", sans-serif;
+      background-color: #f9fafb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      color: #111;
+    }
 
-      body {
-        margin: 0;
-        background-color: var(--light-bg);
-        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        color: var(--text-color);
-        text-align: center;
-      }
+    /* 固定Aisleロゴ（右上） */
+    .aisle-logo {
+      position: fixed;
+      top: 12px;
+      right: 16px;
+      z-index: 50;
+      height: 22px;
+      opacity: 0.75;
+    }
 
-      /* === プロフィール風ヘッダー === */
-      header {
-        margin-top: 60px;
-        margin-bottom: 30px;
-      }
+    /* メインコンテナ */
+    .chat-container {
+      margin-top: 100px;
+      text-align: center;
+      width: 90%;
+      max-width: 600px;
+    }
 
-      header img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
-      }
+    /* 丸ロゴ */
+    .app-circle {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: contain; /* 全体を映す */
+      background: #fff;
+      padding: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: block;
+      margin: 0 auto 16px;
+    }
 
-      header h1 {
-        font-size: 1.8rem;
-        margin: 0.8rem 0 0.3rem;
-      }
+    /* タイトル */
+    #app-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
 
-      header p {
-        color: var(--text-light);
-        font-size: 0.95rem;
-        margin: 0.2rem 0;
-      }
+    /* サブタイトル */
+    #app-description {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
 
-      /* === 会話きっかけテキスト === */
-      .prompt-intro {
-        background: white;
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 1rem 1.5rem;
-        margin: 1rem auto 2rem;
-        max-width: 420px;
-        color: var(--text-light);
-        font-size: 0.95rem;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-      }
+    /* スターターメッセージ（きっかけバブル） */
+    #starter-bubble {
+      display: inline-block;
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 12px 18px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      font-size: 0.95rem;
+      color: #333;
+    }
 
-      /* === チャットエリア === */
-      #chat {
-        max-width: 700px;
-        margin: 0 auto 40px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        overflow-y: auto;
-        height: 55vh;
-        text-align: left;
-      }
+    /* チャット入力欄 */
+    .chat-box {
+      margin-top: 24px;
+      width: 100%;
+      display: flex;
+      border-top: 1px solid #ddd;
+      padding: 12px;
+      background: #fff;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      justify-content: center;
+    }
 
-      .message {
-        display: flex;
-        margin-bottom: 1rem;
-      }
+    .chat-input {
+      width: 80%;
+      max-width: 480px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+    }
 
-      .user {
-        justify-content: flex-end;
-      }
+    .chat-button {
+      background-color: #00aaff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin-left: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
 
-      .bot {
-        justify-content: flex-start;
-      }
+    .chat-button:hover {
+      background-color: #0094dd;
+    }
+  </style>
+</head>
+<body>
 
-      .bubble {
-        padding: 10px 15px;
-        border-radius: 12px;
-        max-width: 75%;
-        line-height: 1.5;
-      }
+  <!-- 右上Aisleロゴ -->
+  <img src="/public/aisle-logo.png" alt="Aisle" class="aisle-logo" />
 
-      .user .bubble {
-        background-color: var(--primary-color);
-        color: white;
-        border-bottom-right-radius: 0;
-      }
+  <!-- メイン -->
+  <div class="chat-container">
+    <img src="/public/icon_profile.png" alt="App icon" class="app-circle" />
 
-      .bot .bubble {
-        background-color: var(--assistant-msg-bg);
-        border-bottom-left-radius: 0;
-      }
+    <h1 id="app-title">Fortune Travel（フォーチュントラベル）</h1>
 
-      /* === 入力欄 === */
-      #input-area {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        background: #fff;
-        position: sticky;
-        bottom: 0;
-        border-top: 1px solid #ddd;
-      }
+    <p id="app-description">
+      Fortune Travelは、風水や方位学をもとに、あなたの運気を高める最適な旅行先を提案します。<br>
+      生年月日や現住所から吉方位を算出し、パーソナライズされた旅のプランをお届けします。
+    </p>
 
-      input {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 15px;
-      }
-
-      button {
-        margin-left: 10px;
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 18px;
-        cursor: pointer;
-        font-weight: 600;
-      }
-
-      button:hover {
-        background-color: #0099D6;
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- ✅ プロフィールヘッダー -->
-    <header>
-      <img src="logo_tag_nashi.png" alt="Aisle ロゴ" />
-      <h1>Aisle Chat</h1>
-      <p>AI出現設計エンジン｜Aisle</p>
-    </header>
-
-    <!-- ✅ 会話のきっかけ -->
-    <div class="prompt-intro">
-      こんにちは。AisleのGPT連携デモです。<br>
-      出現構造やマーケティング支援について話してみませんか？
+    <div id="starter-bubble">
+      誕生日とお住まいの地域（都道府県レベルでOK）など教えてください。
     </div>
+  </div>
 
-    <!-- ✅ チャットUI -->
-    <main id="chat"></main>
+  <!-- 下部チャット入力欄 -->
+  <div class="chat-box">
+    <input type="text" class="chat-input" placeholder="メッセージを入力..." />
+    <button class="chat-button">送信</button>
+  </div>
 
-    <!-- ✅ 入力欄 -->
-    <div id="input-area">
-      <input id="user-input" placeholder="メッセージを入力..." />
-      <button id="send">送信</button>
-    </div>
-
-    <!-- ✅ JSロジック -->
-    <script>
-      const chat = document.getElementById("chat");
-      const input = document.getElementById("user-input");
-      const sendBtn = document.getElementById("send");
-
-      function addMessage(role, text) {
-        const msg = document.createElement("div");
-        msg.classList.add("message", role);
-        msg.innerHTML = `<div class="bubble">${text}</div>`;
-        chat.appendChild(msg);
-        chat.scrollTop = chat.scrollHeight;
-      }
-
-      async function sendMessage() {
-        const text = input.value.trim();
-        if (!text) return;
-        addMessage("user", text);
-        input.value = "";
-        addMessage("bot", "…考えています…");
-
-        try {
-          const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              messages: [
-                { role: "system", content: "あなたは親切なアシスタントです。" },
-                { role: "user", content: text },
-              ],
-            }),
-          });
-          const data = await response.json();
-          document.querySelector(".bot:last-child .bubble").innerText =
-            data.reply || "（応答なし）";
-        } catch (error) {
-          document.querySelector(".bot:last-child .bubble").innerText =
-            "エラーが発生しました。";
-        }
-      }
-
-      sendBtn.addEventListener("click", sendMessage);
-      input.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") sendMessage();
-      });
-    </script>
-  </body>
+</body>
 </html>

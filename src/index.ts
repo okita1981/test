@@ -1,47 +1,58 @@
+export interface Env {
+  OPENAI_API_KEY: string;
+  SYSTEM_PROMPT: string;
+}
+
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const MODEL = "gpt-4o-mini";
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    // --- CORSプリフライト対応 ---
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-      });
+  async fetch(req: Request, env: Env): Promise<Response> {
+    const url = new URL(req.url);
+
+    // ヘルスチェック
+    if (url.pathname === "/api/health") {
+      return new Response("ok", { status: 200 });
     }
 
-    const url = new URL(request.url);
+    // チャット本体
+    if (url.pathname === "/api/chat" && req.method === "POST") {
+      try {
+        const { messages = [] } = await req.json<any>();
+        const sys = [{ role: "system", content: env.SYSTEM_PROMPT }];
+        const body = {
+          model: MODEL,
+          temperature: 0.4,
+          messages: [...sys, ...messages],
+        };
 
-    // --- OpenAIに中継するルート ---
-    if (url.pathname === "/api/chat" && request.method === "POST") {
-      const { messages = [] } = await request.json().catch(() => ({ messages: [] }));
+        const r = await fetch(OPENAI_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-      const reply = data?.choices?.[0]?.message?.content ?? "応答を取得できませんでした。";
-
-      return new Response(JSON.stringify({ reply }), {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-        },
-      });
+        if (!r.ok) {
+          const text = await r.text();
+          return json({ error: "openai_error", detail: text }, 500);
+        }
+        const j = await r.json();
+        const reply = j?.choices?.[0]?.message?.content ?? "（応答なし）";
+        return json({ reply }, 200);
+      } catch (e: any) {
+        return json({ error: "bad_request", detail: String(e) }, 400);
+      }
     }
 
-    // --- その他のルートはNot found ---
     return new Response("Not found", { status: 404 });
   },
 };
+
+const json = (d: any, s = 200) =>
+  new Response(JSON.stringify(d), {
+    status: s,
+    headers: { "Content-Type": "application/json" },
+  });

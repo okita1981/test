@@ -23,9 +23,10 @@
       position: fixed;
       top: 12px;
       right: 16px;
-      z-index: 50;
+      z-index: 999;
       height: 22px;
-      opacity: 0.75;
+      opacity: 0.85;
+      pointer-events: none;
     }
 
     /* メインコンテナ */
@@ -53,18 +54,19 @@
     #app-title {
       font-size: 1.5rem;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
 
-    /* サブタイトル */
+    /* サブタイトル（4行レイアウト） */
     #app-description {
       font-size: 0.95rem;
       color: #555;
       margin-bottom: 24px;
-      line-height: 1.6;
+      line-height: 1.8;
+      white-space: pre-line; /* 改行をそのまま反映 */
     }
 
-    /* スターターメッセージ（きっかけバブル） */
+    /* スターターメッセージ */
     #starter-bubble {
       display: inline-block;
       background-color: #ffffff;
@@ -116,18 +118,21 @@
 </head>
 <body>
 
-  <!-- 右上Aisleロゴ -->
-  <img src="/public/aisle-logo.png" alt="Aisle" class="aisle-logo" />
+  <!-- ✅ 右上Aisleロゴ -->
+  <img src="aisle-logo.png" alt="Aisle" class="aisle-logo" />
 
   <!-- メイン -->
   <div class="chat-container">
-    <img src="/public/icon_profile.png" alt="App icon" class="app-circle" />
+    <!-- ✅ 丸ロゴ（アプリ固有） -->
+    <img src="icon_profile.png" alt="App icon" class="app-circle" />
 
     <h1 id="app-title">Fortune Travel（フォーチュントラベル）</h1>
 
     <p id="app-description">
-      Fortune Travelは、風水や方位学をもとに、あなたの運気を高める最適な旅行先を提案します。<br>
-      生年月日や現住所から吉方位を算出し、パーソナライズされた旅のプランをお届けします。
+Fortune Travelは、風水や方位学をもとに、
+あなたの運気を高める最適な旅行先を提案します。
+生年月日や現住所から吉方位を算出し、
+パーソナライズされた旅のプランをお届けします。
     </p>
 
     <div id="starter-bubble">
@@ -135,7 +140,7 @@
     </div>
   </div>
 
-  <!-- 下部チャット入力欄 -->
+  <!-- チャット入力欄 -->
   <div class="chat-box">
     <input type="text" class="chat-input" placeholder="メッセージを入力..." />
     <button class="chat-button">送信</button>
